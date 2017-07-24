@@ -37,6 +37,7 @@
 
 #include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
+#include "DataFormats/L1TCalorimeter/interface/CaloTower.h"
 #include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
@@ -81,6 +82,9 @@ namespace {
     float l1Jet_rawEt;
     float l1Jet_seedEt;
     float l1Jet_puEt;
+    std::vector<float> caloTower_hwEt;
+    std::vector<float> caloTower_ieta;
+    std::vector<float> caloTower_iphi;
     std::vector<float> hcalTower_et;
     std::vector<float> hcalTower_eta;
     std::vector<float> hcalTower_phi;
@@ -113,6 +117,7 @@ class L1JetTupler : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::
 
     edm::EDGetTokenT<EcalTrigPrimDigiCollection> ecalTPs_;
     edm::EDGetTokenT<HcalTrigPrimDigiCollection> hcalTPs_;
+    edm::EDGetTokenT<l1t::CaloTowerBxCollection> caloTowers_;
     edm::EDGetTokenT<l1t::JetBxCollection> l1Jets_;
     edm::EDGetTokenT<pat::JetCollection> recoJets_;
 
@@ -124,6 +129,7 @@ class L1JetTupler : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::
 L1JetTupler::L1JetTupler(const edm::ParameterSet& iConfig):
   ecalTPs_(consumes<EcalTrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("ecalTPs"))),
   hcalTPs_(consumes<HcalTrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("hcalTPs"))),
+  caloTowers_(consumes<l1t::CaloTowerBxCollection>(iConfig.getParameter<edm::InputTag>("caloTowers"))),
   l1Jets_(consumes<l1t::JetBxCollection>(iConfig.getParameter<edm::InputTag>("l1Jets"))),
   recoJets_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("patJets")))
 {
@@ -158,6 +164,9 @@ L1JetTupler::L1JetTupler(const edm::ParameterSet& iConfig):
   l1JetTree_->Branch("l1Jet_rawEt", &l1Jet_.l1Jet_rawEt);
   l1JetTree_->Branch("l1Jet_seedEt", &l1Jet_.l1Jet_seedEt);
   l1JetTree_->Branch("l1Jet_puEt", &l1Jet_.l1Jet_puEt);
+  l1JetTree_->Branch("caloTower_hwEt", &l1Jet_.caloTower_hwEt);
+  l1JetTree_->Branch("caloTower_ieta", &l1Jet_.caloTower_ieta);
+  l1JetTree_->Branch("caloTower_iphi", &l1Jet_.caloTower_iphi);
   l1JetTree_->Branch("hcalTower_et", &l1Jet_.hcalTower_et);
   l1JetTree_->Branch("hcalTower_eta", &l1Jet_.hcalTower_eta);
   l1JetTree_->Branch("hcalTower_phi", &l1Jet_.hcalTower_phi);
@@ -201,6 +210,9 @@ L1JetTupler::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   Handle<HcalTrigPrimDigiCollection> hcalTPs;
   iEvent.getByToken(hcalTPs_, hcalTPs);
 
+  Handle<l1t::CaloTowerBxCollection> caloTowers;
+  iEvent.getByToken(caloTowers_, caloTowers);
+
   Handle<l1t::JetBxCollection> l1Jets;
   iEvent.getByToken(l1Jets_, l1Jets);
 
@@ -210,7 +222,7 @@ L1JetTupler::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   int iJet = 0;
   for (const auto& recoJet : *recoJets) {
     if ( recoJet.pt() < 250 or std::abs(recoJet.eta()) < 2.5 ) continue;
-    std::cout << "New jet" << std::endl;
+    // std::cout << "New jet" << std::endl;
 
     l1Jet_.iJet = iJet;
     l1Jet_.recoJet_pt = recoJet.pt();
@@ -234,14 +246,14 @@ L1JetTupler::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
 
-    std::cout << "hw at L1: " << matchedJet.hwEta() << "," << matchedJet.hwPhi() << std::endl;
+    // std::cout << "hw at L1: " << matchedJet.hwEta() << "," << matchedJet.hwPhi() << std::endl;
     // hwEta from unpacked jets in GT coordinates
     // Cheap conversion trick: find matching tower
     int ieta{0}, iphi{0};
     for (const auto& hcalTp : *hcalTPs) {
       int ietafix = l1t::CaloTools::gtEta(hcalTp.id().ieta());
       if ( ietafix == matchedJet.hwEta() and l1t::CaloTools::gtPhi(0, hcalTp.id().iphi()) == matchedJet.hwPhi() ) {
-        std::cout << "gt matched tp" << hcalTp.id() << std::endl;
+        // std::cout << "gt matched tp" << hcalTp.id() << std::endl;
         ieta = hcalTp.id().ieta();
         iphi = hcalTp.id().iphi();
       }
@@ -259,8 +271,8 @@ L1JetTupler::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           iphi = hcalTp.id().iphi();
         }
       }
-      std::cout << "gt matched tp ieta " << ieta << " iphi " << iphi << ", dR=" << matchTowDr << std::endl;
-      std::cout << "gt coord " << l1t::CaloTools::gtEta(ieta) << ", " << l1t::CaloTools::gtPhi(0, iphi) << std::endl;
+      // std::cout << "gt matched tp ieta " << ieta << " iphi " << iphi << ", dR=" << matchTowDr << std::endl;
+      // std::cout << "gt coord " << l1t::CaloTools::gtEta(ieta) << ", " << l1t::CaloTools::gtPhi(0, iphi) << std::endl;
     }
 
     l1Jet_.l1Jet_matchDeltaR = matchDr;
@@ -275,6 +287,19 @@ L1JetTupler::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     l1Jet_.l1Jet_rawEt = matchedJet.rawEt();
     l1Jet_.l1Jet_seedEt = matchedJet.seedEt();
     l1Jet_.l1Jet_puEt = matchedJet.puEt();
+
+    l1Jet_.caloTower_hwEt.clear();
+    l1Jet_.caloTower_ieta.clear();
+    l1Jet_.caloTower_iphi.clear();
+    for (const auto& caloTp : *caloTowers) {
+      int deta = std::abs(caloTp.hwEta() - ieta);
+      if ( deta > 4 ) continue;
+      int dphi = std::abs((caloTp.hwPhi() - iphi + 36) % 72 - 36);
+      if ( dphi > 4 ) continue;
+      l1Jet_.caloTower_hwEt.push_back(caloTp.hwPt());
+      l1Jet_.caloTower_ieta.push_back(caloTp.hwEta());
+      l1Jet_.caloTower_iphi.push_back(caloTp.hwPhi());
+    }
 
     l1Jet_.hcalTower_et.clear();
     l1Jet_.hcalTower_eta.clear();
@@ -316,13 +341,13 @@ L1JetTupler::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       l1Jet_.ecalTower_iphi.push_back(ecalTp.id().iphi());
     }
 
-    std::cout << "hcal tower size: " << l1Jet_.hcalTower_et.size() << std::endl;
-    std::cout << "ecal tower size: " << l1Jet_.ecalTower_et.size() << std::endl;
+    // std::cout << "hcal tower size: " << l1Jet_.hcalTower_et.size() << std::endl;
+    // std::cout << "ecal tower size: " << l1Jet_.ecalTower_et.size() << std::endl;
     float jetet = 0.;
     for(auto et : l1Jet_.hcalTower_et) jetet += et;
     for(auto et : l1Jet_.ecalTower_et) jetet += et;
-    std::cout << "jet sum et: " << jetet << std::endl;
-    std::cout << "l1jet sum et: " << matchedJet.et() << std::endl;
+    // std::cout << "jet sum et: " << jetet << std::endl;
+    // std::cout << "l1jet sum et: " << matchedJet.et() << std::endl;
 
 
     l1JetTree_->Fill();

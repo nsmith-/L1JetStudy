@@ -404,10 +404,8 @@ root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_1257
 root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_481.root
 root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_482.root
 root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_483.root
-root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_484.root
 root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_485.root
 root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_486.root
-root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_487.root
 root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_488.root
 root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_489.root
 root://eoscms.cern.ch//store/user/ncsmith/SingleMuon/crab_pickEvents/170717_125710/0000/pickevents_49.root

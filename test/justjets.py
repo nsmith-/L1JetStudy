@@ -37,7 +37,8 @@ process.source = cms.Source("PoolSource",
 )
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v16', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v16', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_data', '')
 
 
 process.load("Configuration.StandardSequences.RawToDigi_Data_cff")    
@@ -60,6 +61,7 @@ process.skimOutput = cms.OutputModule("PoolOutputModule",
         'keep *_l1tCaloLayer1Digis_*_*',
         'keep *_caloStage2Digis_Jet_*',
         'keep  l1tJetBXVector_simCaloStage2Digis_*_*',
+        'keep  l1tCaloTowerBXVector_*_*_*',
     ),
 )
 process.output_step = cms.EndPath(process.skimOutput)
@@ -70,11 +72,21 @@ process.schedule = cms.Schedule(
 )
 
 # Automatic addition of the customisation function from L1Trigger.Configuration.customiseReEmul
-from L1Trigger.Configuration.customiseReEmul import L1TReEmulFromRAW 
+from L1Trigger.Configuration.customiseReEmul import L1TReEmulFromRAWCalouGT 
 
 #call to customisation function L1TReEmulFromRAW imported from L1Trigger.Configuration.customiseReEmul
-process = L1TReEmulFromRAW(process)
+process = L1TReEmulFromRAWCalouGT(process)
 
+process.L1TReEmulPath.remove(process.simDtTriggerPrimitiveDigis)
+process.L1TReEmulPath.remove(process.simCscTriggerPrimitiveDigis)
+process.L1TReEmulPath.remove(process.simTwinMuxDigis)
+process.L1TReEmulPath.remove(process.simBmtfDigis)
+process.L1TReEmulPath.remove(process.simEmtfDigis)
+process.L1TReEmulPath.remove(process.simOmtfDigis)
+process.L1TReEmulPath.remove(process.simGmtCaloSumDigis)
+process.L1TReEmulPath.remove(process.simGmtStage2Digis)
+process.L1TReEmulPath.remove(process.simGtExtFakeStage2Digis)
+process.L1TReEmulPath.remove(process.simGtStage2Digis)
 #process.remove(process.TotemDAQMappingESSourceXML)
 #ctppsDiamondRawToDigi
 #totemRPRawToDigi
