@@ -14,7 +14,7 @@ process.source = cms.Source ("PoolSource", fileNames = cms.untracked.vstring(opt
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v16', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '92X_dataRun2_Prompt_v4', '')
 
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
 process.load('Configuration.Geometry.GeometrySimDB_cff')
